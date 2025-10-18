@@ -17,14 +17,9 @@ func StartServer(port string) error {
 	service := capture.NewCaptureService(repo)
 	handler := NewEventHandler(service)
 
-	http.HandleFunc("/events", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodPost {
-			handler.CreateEvent(w, r)
-		} else {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	})
+	mux := http.NewServeMux()
+	mux.HandleFunc("POST /events", handler.CreateEvent)
 
 	log.Printf("Starting API Server on port [%s]", port)
-	return http.ListenAndServe(":"+port, nil)
+	return http.ListenAndServe(":"+port, mux)
 }
